@@ -1,0 +1,57 @@
+{
+  "id": "f046d6f5-e74d-45ae-83f3-3bbb74b90187",
+  "name": "ProjectMigration",
+  "publisher": "Default Publisher",
+  "version": "1.0.0.33",
+  "brief": "",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [    
+    {
+      "id": "0b0a0933-50d9-4352-8803-7bf91e6c5491",
+      "name": "SOFTSTORE Localization Pack for Portugal",
+      "publisher": "Softstore SA",
+      "version": "22.0.1905.5"
+    },
+    {
+    "id": "9b4542c4-eef7-41b9-ad33-83b1e1bf3618",
+    "name": "ARQUIS Base",
+    "publisher": "ARQUICONSULT SA",
+    "version": "1.0.0.0"
+  },
+  {
+    "id": "9ec4af38-8f6c-4b3a-a7e2-c93b8a0d1271",
+    "name": "EGEAC Base",
+    "publisher": "ARQUICONSULT SA",
+    "version": "1.0.0.8"
+  },
+  {
+    "id": "6cfee4a2-2fba-44f1-befa-ce72f6fc7cdb",
+    "name": "ARQUIS Public Accounting",
+    "publisher": "ARQUICONSULT SA",
+    "version": "1.0.0.0"
+  }
+],
+  "screenshots": [],
+  "platform": "1.0.0.0",
+  "application": "24.0.0.0",
+  "idRanges": [
+    {
+      "from": 90000,
+      "to": 90020
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "13.0",
+  "features": [
+    "NoImplicitWith"
+  ]
+}
