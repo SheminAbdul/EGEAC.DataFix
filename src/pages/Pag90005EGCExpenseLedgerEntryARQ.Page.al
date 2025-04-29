@@ -332,10 +332,10 @@ page 90005 "Expense Ledger Entry ARQ"
                 {
                     ToolTip = 'Specifies the value of the Cabimento field.', Comment = '%';
                 }
-                field("EGC Faturas Pagar"; Rec."EGC Faturas Pagar")
-                {
-                    ToolTip = 'Specifies the value of the Faturado field.', Comment = '%';
-                }
+                // field("EGC Faturas Pagar"; Rec."EGC Faturas Pagar")
+                // {
+                //     ToolTip = 'Specifies the value of the Faturado field.', Comment = '%';
+                // }
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.', Comment = '%';

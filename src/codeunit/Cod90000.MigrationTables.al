@@ -548,37 +548,55 @@ codeunit 90000 "Migration Tables"
 
         CLEAR(Window);
         Window.OPEN(TextProcessingLbl);
-        Clear(ExpenseDocHdr);
-        ExpenseDocHdr.SetRange("Document Type", ExpenseDocHdr."Document Type"::"Expense Proposal");
-        ExpenseDocHdr.SetFilter("Posting Date", '>=%1', DMY2Date(1, 1, 2025));
-        ExpenseDocHdr.setfilter(Status, '<>%1', ExpenseDocHdr.Status::Initial);
-        //ExpenseDocHdr.SetRange("No.", 'PDP2503-0252');
-        ExpenseDocHdr.setfilter("Vendor No.", '%1', '');
-        TotalCount := ExpenseDocHdr.COUNT;
-        ExpenseDocHdr.FindSet();
-        Counter := 0;
-        repeat
-            Counter := Counter + 1;
-            Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
-            Clear(ExpenseDocLine);
-            ExpenseDocLine.SetRange("Document No.", ExpenseDocHdr."No.");
-            ExpenseDocline.setfilter("Pay-to Vendor No.", '%1', '');
-            ExpenseDocLine.SetFilter("no.", '<>%1', '');
-            ExpenseDocLine.SetFilter(Quantity, '<>%1', 0);
-            ExpenseDocLine.setrange("VAT Bus. Posting Group", 'ND_NAC');
-            if ExpenseDocLine.FindSet() then begin
-                ServiceAddress.Get(ExpenseDocHdr.Service);
-                if not ServiceAddress."QQQCP No Deduct VAT on Purch." then
-                    repeat
 
-                        ExpenseDocLine."Deduct VAT Exception" := true;
-                        ExpenseDocLine.Validate("VAT Bus. Posting Group", 'NACIONAL');
-                        ExpenseDocLine.Modify();
 
-                    until ExpenseDocLine.Next() = 0;
-            end;
-        until ExpenseDocHdr.Next() = 0;
+        Clear(ExpenseDocLine);
+        ExpenseDocLine.SetRange("Document Type", ExpenseDocLine."Document Type"::"Expense Proposal");
+        ExpenseDocLine.SetFilter("no.", '<>%1', '');
+        //ExpenseDocLine.SetFilter(Quantity, '<>%1', 0);
+        ExpenseDocLine.SetFilter(SystemCreatedAt, '>=%1', CreateDateTime(DMY2Date(10, 3, 2025), 0T));
+        TotalCount := ExpenseDocLine.COUNT;
+        if ExpenseDocLine.FindSet() then
+            repeat
+                Counter := Counter + 1;
+                Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
+                if ExpenseDocHdr.get(ExpenseDocLine."Document Type", ExpenseDocLine."Document No.") and (ExpenseDocHdr.Status = ExpenseDocHdr.Status::Initial) then
+                    VerifyDeduct(ExpenseDocLine);
+
+            until ExpenseDocLine.Next() = 0;
+
         Window.CLOSE();
+
+        // Clear(ExpenseDocHdr);
+        // ExpenseDocHdr.SetRange("Document Type", ExpenseDocHdr."Document Type"::"Expense Proposal");
+        // ExpenseDocHdr.SetFilter("Posting Date", '>=%1', DMY2Date(1, 1, 2025));
+        // ExpenseDocHdr.setfilter(Status, '<>%1', ExpenseDocHdr.Status::Initial);
+        // //ExpenseDocHdr.SetRange("No.", 'PDP2503-0252');
+        // ExpenseDocHdr.setfilter("Vendor No.", '%1', '');
+        // TotalCount := ExpenseDocHdr.COUNT;
+        // ExpenseDocHdr.FindSet();
+        // Counter := 0;
+        // repeat
+        //     Counter := Counter + 1;
+        //     Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
+        //     Clear(ExpenseDocLine);
+        //     ExpenseDocLine.SetRange("Document No.", ExpenseDocHdr."No.");
+        //     //ExpenseDocline.setfilter("Pay-to Vendor No.", '%1', '');
+        //     ExpenseDocLine.SetFilter("no.", '<>%1', '');
+        //     ExpenseDocLine.SetFilter(Quantity, '<>%1', 0);
+        //     //ExpenseDocLine.setrange("VAT Bus. Posting Group", 'ND_NAC');
+        //     if ExpenseDocLine.FindSet() then begin
+        //         //ServiceAddress.Get(ExpenseDocHdr.Service);
+        //         //if not ServiceAddress."QQQCP No Deduct VAT on Purch." then
+        //             repeat
+
+        //                 VerifyDeduct(ExpenseDocLine);
+        //                 //ExpenseDocLine.Modify();
+
+        //             until ExpenseDocLine.Next() = 0;
+        //     end;
+        // until ExpenseDocHdr.Next() = 0;
+        //Window.CLOSE();
     end;
 
     procedure FixUnitOfMeasure()
@@ -597,6 +615,7 @@ codeunit 90000 "Migration Tables"
             exit;
 
         // Proposta de despesa provisóra        
+
         CLEAR(Window);
         Window.OPEN(TextProcessingLbl4);
         Clear(ExpenseDocLine);
@@ -611,7 +630,7 @@ codeunit 90000 "Migration Tables"
                 Counter := Counter + 1;
                 Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
                 ExpenseDocLine2.get(ExpenseDocLine."Document Type", ExpenseDocLine."Document No.", ExpenseDocLine."Line No.");
-                ExpenseDocLine2."Unit of Measure" := 'UN';
+                ExpenseDocLine2."Unit of Measure Code" := 'UN';
                 ExpenseDocLine2.Modify();
             until ExpenseDocLine.Next() = 0;
         Window.CLOSE();
@@ -632,7 +651,7 @@ codeunit 90000 "Migration Tables"
                 Counter := Counter + 1;
                 Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
                 PostedExpDocLine2.get(PostedExpDocLine."Document Type", PostedExpDocLine."Document No.", PostedExpDocLine."Line No.");
-                PostedExpDocLine2."Unit of Measure" := 'UN';
+                PostedExpDocLine2."Unit of Measure code" := 'UN';
                 PostedExpDocLine2.Modify();
             until PostedExpDocLine.Next() = 0;
         Window.CLOSE();
@@ -653,7 +672,7 @@ codeunit 90000 "Migration Tables"
                 Counter := Counter + 1;
                 Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
                 PurchLine2.get(PurchLine."Document Type", PurchLine."Document No.", PurchLine."Line No.");
-                PurchLine2."Unit of Measure" := 'UN';
+                PurchLine2."Unit of Measure Code" := 'UN';
                 PurchLine2.Modify();
             until PurchLine.Next() = 0;
         Window.CLOSE();
@@ -673,13 +692,83 @@ codeunit 90000 "Migration Tables"
                 Counter := Counter + 1;
                 Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
                 PurchRcpLine2.get(PurchRcpLine."Document No.", PurchRcpLine."Line No.");
-                PurchRcpLine2."Unit of Measure" := 'UN';
+                PurchRcpLine2."Unit of Measure Code" := 'UN';
                 PurchRcpLine2.Modify();
             until PurchRcpLine.Next() = 0;
         Window.CLOSE();
 
     end;
 
+    procedure FixRetentionNo()
+    var
+        PstdExpDocHdr: record "QQQCP Posted Expense Doc Hdr";
+        PstdExpDocHdr2: record "QQQCP Posted Expense Doc Hdr";
+        PtdOrderSrcRet: record "QQQCP Pst Pay Order Src Retent";
+    begin
+
+        if not Confirm('Are you sure you want to create the budget plan?') then
+            exit;
+
+        CLEAR(Window);
+        Window.OPEN(TextProcessingLbl2);
+
+        Clear(PstdExpDocHdr);
+        PstdExpDocHdr.SetRange("Document Type", PstdExpDocHdr."Document Type"::"Payment Order");
+        PstdExpDocHdr.Setfilter("Retention Document No.", '%1', 'OP*');
+        TotalCount := PstdExpDocHdr.COUNT;
+
+
+        Counter := 0;
+        if PstdExpDocHdr.FindSet() then
+            repeat
+                Counter := Counter + 1;
+                Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
+                clear(PtdOrderSrcRet);
+                PtdOrderSrcRet.SETRANGE("Payment Order Type", PstdExpDocHdr."Payment Order Type");
+                PtdOrderSrcRet.SETRANGE("Payment Order No.", PstdExpDocHdr."No.");
+                if not PtdOrderSrcRet.FindSet() then begin
+                    PstdExpDocHdr2.get(PstdExpDocHdr."Document Type", PstdExpDocHdr."No.");
+                    PstdExpDocHdr2."Retention Document No." := '';
+                    PstdExpDocHdr2.Modify();
+                end;
+
+            until PstdExpDocHdr.Next() = 0;
+        Window.Close();
+
+    end;
+
+    internal procedure VerifyDeduct(var ExpDocLine: record "QQQCP Expense Document Line")
+    var
+        ExpDocHdr: Record "QQQCP expense document header";
+        Job: record "Job";
+        ServiceAddress: Record "QQQAB Service Address";
+        Vendor: record "vendor";
+    begin
+        if (ExpDocLine."Document Type" <> ExpDocLine."Document Type"::"Expense Proposal") or (ExpDocLine."Job No." = '')
+            or (ExpDocLine.type <> ExpDocLine.type::Item) then
+            exit;
+        //if "Pay-to Vendor No." = '' then begin
+        clear(ExpDocHdr);
+        ExpDocHdr.GET(ExpDocLine."Document Type", ExpDocLine."Document No.");
+        if job.get(ExpDocLine."Job No.") then;
+        if ServiceAddress.Get(job."QQQAB Service") then;
+        if (not ServiceAddress."QQQCP No Deduct VAT on Purch.") then begin
+            //and (rec."VAT Bus. Posting Group" = 'ND_NAC')  and (ExpDocHdr."Vendor No." = '') then begin
+            if vendor.get(ExpDocHdr."Vendor No.") then
+                ExpDocLine."VAT Bus. Posting Group" := vendor."VAT Bus. Posting Group"
+            else begin
+                ExpDocLine."Deduct VAT Exception" := true;
+                ExpDocLine."VAT Bus. Posting Group" := 'NACIONAL';
+            end
+        end
+        else begin
+            ExpDocLine."Deduct VAT Exception" := false;
+            ExpDocLine."VAT Bus. Posting Group" := ServiceAddress."QQQCP Default ND VAT Bus. Code";
+        end;
+
+        ExpDocLine.Validate("Use Tax");
+        //end;
+    end;
 
 
     [EventSubscriber(ObjectType::Table, Database::"Purchase Line", 'OnAfterModifyEvent', '', false, false)]
@@ -718,6 +807,53 @@ codeunit 90000 "Migration Tables"
 
 
     end;
+
+    [EventSubscriber(ObjectType::Table, Database::"QQQCP Posted Expense Doc Hdr", 'OnAfterInsertEvent', '', false, false)]
+    local procedure OnAfterInsertEvent_PtdExpDocHdr(var Rec: Record "QQQCP Posted Expense Doc Hdr"; RunTrigger: Boolean)
+    var
+        OrderSrcRet: record "QQQCP Pay. Order Src Retention";
+    begin
+        if rec."Retention Document No." <> '' then begin
+            clear(OrderSrcRet);
+            OrderSrcRet.SETRANGE("Payment Order Type", rec."Payment Order Type");
+            OrderSrcRet.SETRANGE("Payment Order No.", rec."Pre-Assigned No.");
+            if not OrderSrcRet.FindSet() then
+                rec."Retention Document No." := '';
+        end;
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Gen. Jnl.-Post Line", OnBeforeRunWithCheck, '', false, false)]
+    local procedure "GenJnlPostLine_OnBeforeRunWithCheck"(var Sender: Codeunit "Gen. Jnl.-Post Line"; var GenJournalLine: Record "Gen. Journal Line"; var GenJournalLine2: Record "Gen. Journal Line"; var GLEntryNo: Integer; var IsHandled: Boolean)
+    var
+        PtdExpDocHdr: record "QQQCP Posted Expense Doc Hdr";
+        PS2TransferHeader: record "QQQCP PS2 Transfer Header";
+    begin
+        if (GenJournalLine2."qqqab payment autorization" <> '') and (GenJournalLine2."Account Type" in [GenJournalLine2."Account Type"::"G/L Account", GenJournalLine2."Account Type"::"Bank Account"])
+            and (GenJournalLine2."Document Type" = GenJournalLine2."Document Type"::Payment) then begin
+            clear(PtdExpDocHdr);
+            if (PtdExpDocHdr.get(PtdExpDocHdr."Document Type"::"Payment Order", GenJournalLine2."qqqab payment autorization")) and (PtdExpDocHdr."PS2 Document Header No." <> '') then;
+            if PS2TransferHeader.get(PtdExpDocHdr."PS2 Document Header No.") and (PS2TransferHeader."Cash-flow code" <> '') and (GenJournalLine2."PTSS Acc: cash-flow code" = '') then
+                GenJournalLine2."PTSS Acc: cash-flow code" := PS2TransferHeader."Cash-flow code";
+        end;
+
+
+    end;
+
+    [EventSubscriber(ObjectType::Table, Database::"QQQCP Expense Document Header", OnAfterModifyExpDocLine_DocumentTypeExpenseProposal, '', false, false)]
+    local procedure "QQQCP Expense Document Header_OnAfterModifyExpDocLine_DocumentTypeExpenseProposal"(var ExpDocLine: Record "QQQCP Expense Document Line")
+    var
+        ExpDocLine2: record "qqqcp expense document line";
+    begin
+        clear(ExpDocLine2);
+        ExpDocLine2.setrange("document type", ExpDocLine."document type");
+        ExpDocLine2.setrange("document no.", ExpDocLine."Document No.");
+        if ExpDocLine2.FindSet() then
+            repeat
+                VerifyDeduct(ExpDocLine2);
+                ExpDocLine2.Modify();
+            until ExpDocLine2.Next() = 0;
+    end;
+
 
     var
         PurchRcpHdr_GRS: Record "Purch. Rcpt. Header";

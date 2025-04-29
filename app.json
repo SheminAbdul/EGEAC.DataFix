@@ -1,8 +1,8 @@
 {
   "id": "f046d6f5-e74d-45ae-83f3-3bbb74b90187",
-  "name": "ProjectMigration",
-  "publisher": "Default Publisher",
-  "version": "1.0.0.33",
+  "name": "Data Fix",
+  "publisher": "ARQUICONSULT SA",
+  "version": "1.0.0.45",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -34,6 +34,12 @@
     "name": "ARQUIS Public Accounting",
     "publisher": "ARQUICONSULT SA",
     "version": "1.0.0.0"
+  },
+  {
+    "id": "506901b7-c0ac-4f98-88cb-594b112d905b",
+    "name": "Ticket Integration",
+    "publisher": "ARQUICONSULT SA",
+    "version": "1.0.0.8"
   }
 ],
   "screenshots": [],
