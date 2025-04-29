@@ -226,6 +226,41 @@ codeunit 90001 "Migration Tables SMA"
         Window.CLOSE();
     end;
 
+    procedure UpdateDimJLE()
+    var
+        JobLedgerEntry: Record "Job Ledger Entry";
+        JobLedgerEntry2: Record "Job Ledger Entry";
+        DimSetEntry: Record "Dimension Set Entry";
+        GeneralLedgerSetup: Record "General Ledger Setup";
+        Counter: Integer;
+    begin
+        GeneralLedgerSetup.Get();
+        if JobLedgerEntry.FindSet() then begin
+            CLEAR(Window);
+            Window.OPEN(TextProcessingLbl);
+            TotalCount := JobLedgerEntry.COUNT;
+            Counter := 0;
+            repeat
+                Counter += 1;
+                Window.UPDATE(1, ROUND(Counter / TotalCount * 10000, 1));
+                if JobLedgerEntry."Dimension Set ID" <> 0 then begin
+                    DimSetEntry.SetRange("Dimension Set ID", JobLedgerEntry."Dimension Set ID");
+                    if DimSetEntry.FindSet() then
+                        repeat
+                            JobLedgerEntry2.Get(JobLedgerEntry."Entry No.");
+                            if DimSetEntry."Dimension Code" = GeneralLedgerSetup."QQQAB Budget Dimension 1 Code" then
+                                JobLedgerEntry2."QQQAB Budget Dimension 1 Code" := DimSetEntry."Dimension Value Code";
+                            if DimSetEntry."Dimension Code" = GeneralLedgerSetup."QQQAB Budget Dimension 2 Code" then
+                                JobLedgerEntry2."QQQAB Budget Dimension 2 Code" := DimSetEntry."Dimension Value Code";
+                            if DimSetEntry."Dimension Code" = GeneralLedgerSetup."QQQAB Budget Dimension 3 Code" then
+                                JobLedgerEntry2."QQQAB Budget Dimension 3 Code" := DimSetEntry."Dimension Value Code";
+                            JobLedgerEntry2.Modify();
+                        until DimSetEntry.Next() = 0;
+                end;
+            until JobLedgerEntry.Next() = 0;
+            Window.CLOSE();
+        end;
+    end;
 
 
 

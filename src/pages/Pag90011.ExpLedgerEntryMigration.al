@@ -331,10 +331,10 @@ page 90011 "Exp Ledger Entry Migration"
                 {
                     ToolTip = 'Specifies the value of the Cabimento field.';
                 }
-                field("EGC Faturas Pagar"; Rec."EGC Faturas Pagar")
-                {
-                    ToolTip = 'Specifies the value of the Faturado field.';
-                }
+                // field("EGC Faturas Pagar"; Rec."EGC Faturas Pagar")
+                // {
+                //     ToolTip = 'Specifies the value of the Faturado field.';
+                // }
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.', Comment = '%';
